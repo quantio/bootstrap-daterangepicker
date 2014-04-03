@@ -1,3 +1,12 @@
 bower_components
 *.sublime-workspace
 *.sublime-project
+
+#IDEA
+.idea/
+
+#NPM Dependencies
+node_modules/
+
+#bower Dependencies
+lib/
