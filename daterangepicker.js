@@ -781,9 +781,11 @@
     },
 
     buildCalendar: function (month, year, hour, minute, side) {
-      function fillWithMonths(calendar) {
+      function fillWithMonths(calendar, side) {
         var initialDate = moment().year(year).startOf('year');
-
+        if (side == 'right') {
+          initialDate.endOf('month');
+        }
         for (var row = 0; row < 3; row++) {
           calendar[row] = [];
           for (var col = 0; col < 4; col++) {
@@ -793,7 +795,7 @@
 
       }
 
-      function fillWithDays(calendar) {
+      function fillWithDays(calendar, side) {
         var i;
         var firstDay = moment([year, month, 1]);
         var lastMonth = moment(firstDay).subtract('month', 1).month();
@@ -830,10 +832,10 @@
         calendar = [];
       switch (self.viewMode) {
         case "months":
-          fillWithMonths(calendar);
+          fillWithMonths(calendar, side);
           break;
         default:
-          fillWithDays(calendar);
+          fillWithDays(calendar, side);
           break;
       }
       return calendar;
