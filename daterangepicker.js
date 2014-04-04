@@ -264,6 +264,7 @@
         this.minViewMode = options.minViewMode;
       }
 
+
       var start, end, range;
 
       //if no start/end dates set, check if an input element contains initial values
@@ -371,6 +372,7 @@
       this.container.addClass('opens' + this.opens);
 
       this.viewMode = this.minViewMode;
+      this.container.addClass('view-mode-' + this.viewMode);
 
       this.updateView();
       this.updateCalendars();
@@ -981,7 +983,7 @@
       }
 
       var html = '<div class="calendar-date">';
-      html += '<table class="table-condensed view-mode-' + self.viewMode + '">';
+      html += '<table class="table-condensed">';
       html += '<thead>';
       html += '<tr>';
 
