@@ -598,22 +598,18 @@
     },
 
     clickPrev: function (e) {
-      var cal = $(e.target).parents('.calendar');
-      if (cal.hasClass('left')) {
-        this.leftCalendar.month.subtract('month', 1);
-      } else {
-        this.rightCalendar.month.subtract('month', 1);
-      }
+      var calContainer = $(e.target).parents('.calendar'),
+        calendar = calContainer.hasClass('left') ? this.leftCalendar : this.rightCalendar;
+
+      calendar.month.subtract(this.viewMode == 'months' ? 'year' : 'month', 1);
       this.updateCalendars();
     },
 
     clickNext: function (e) {
-      var cal = $(e.target).parents('.calendar');
-      if (cal.hasClass('left')) {
-        this.leftCalendar.month.add('month', 1);
-      } else {
-        this.rightCalendar.month.add('month', 1);
-      }
+      var calContainer = $(e.target).parents('.calendar'),
+        calendar = calContainer.hasClass('left') ? this.leftCalendar : this.rightCalendar;
+
+      calendar.month.add(this.viewMode == 'months' ? 'year' : 'month', 1);
       this.updateCalendars();
     },
 
@@ -912,20 +908,21 @@
       function calendarBody() {
 
         function classNames(date) {
-          var classes = ['available'];
-          if (date.month() !== calendar[1][1].month()) {
+          var classes = ['available'],
+            format = self.viewMode == 'months' ? 'YYYY-MM' : 'YYYY-MM-DD';
+          if (date.month() !== calendar[1][1].month() && self.viewMode == 'days') {
             classes.push('off');
           }
 
           if ((minDate && date.isBefore(minDate)) || (maxDate && date.isAfter(maxDate))) {
             classes.push('off');
             classes.push('disabled');
-          } else if (date.format('YYYY-MM-DD') == selected.format('YYYY-MM-DD')) {
+          } else if (date.format(format) == selected.format(format)) {
             classes.push('active');
-            if (date.format('YYYY-MM-DD') == self.startDate.format('YYYY-MM-DD')) {
+            if (date.format(format) == self.startDate.format(format)) {
               classes.push('start-date');
             }
-            if (date.format('YYYY-MM-DD') == self.endDate.format('YYYY-MM-DD')) {
+            if (date.format(format) == self.endDate.format(format)) {
               classes.push('end-date');
             }
           } else if (date >= self.startDate && date <= self.endDate) {
@@ -981,7 +978,7 @@
       }
 
       var html = '<div class="calendar-date">';
-      html += '<table class="table-condensed">';
+      html += '<table class="table-condensed view-mode-' + self.viewMode + '">';
       html += '<thead>';
       html += '<tr>';
 
@@ -1003,7 +1000,7 @@
         dateHtml = this.renderDropdowns(calendar[1][1], minDate, maxDate);
       }
 
-      html += '<th colspan="5" class="month">' + dateHtml + '</th>';
+      html += '<th colspan="' + (self.viewMode == 'months' ? 2 : 5) + '" class="month">' + dateHtml + '</th>';
       if (!maxDate || maxDate.isAfter(calendar[1][1])) {
         html += '<th class="next available"><i class="fa fa-arrow-right icon-arrow-right glyphicon glyphicon-arrow-right"></i></th>';
       } else {
