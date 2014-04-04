@@ -783,13 +783,14 @@
     buildCalendar: function (month, year, hour, minute, side) {
       function fillWithMonths(calendar, side) {
         var initialDate = moment().year(year).startOf('year');
-        if (side == 'right') {
-          initialDate.endOf('month');
-        }
         for (var row = 0; row < 3; row++) {
           calendar[row] = [];
           for (var col = 0; col < 4; col++) {
-            calendar[row][col] = initialDate.clone().add('months', ((row * 4) + col));
+            var month = initialDate.clone().add('months', ((row * 4) + col));
+            if (side == 'right') {
+              month.endOf('month');
+            }
+            calendar[row][col] = month;
           }
         }
 
