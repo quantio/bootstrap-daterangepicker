@@ -264,6 +264,7 @@
         this.minViewMode = options.minViewMode;
       }
 
+      this.singleDateRangePicker = options.singleDateRangePicker || false;
 
       var start, end, range;
 
@@ -537,6 +538,8 @@
 
       this.oldStartDate = this.startDate.clone();
       this.oldEndDate = this.endDate.clone();
+      this.leftCalendar.selected = false;
+      this.rightCalendar.selected = false;
 
       $(document).off('click.daterangepicker', this.outsideClick);
       this.element.trigger('hide.daterangepicker', this);
@@ -640,6 +643,7 @@
       if (cal.hasClass('left')) {
         startDate = this.leftCalendar.calendar[row][col];
         endDate = this.endDate;
+        this.leftCalendar.selected = true;
         if (typeof this.dateLimit === 'object') {
           var maxDate = moment(startDate).add(this.dateLimit).startOf('day');
           if (endDate.isAfter(maxDate)) {
@@ -649,6 +653,7 @@
       } else {
         startDate = this.startDate;
         endDate = this.rightCalendar.calendar[row][col];
+        this.rightCalendar.selected = true;
         if (typeof this.dateLimit === 'object') {
           var minDate = moment(endDate).subtract(this.dateLimit).startOf('day');
           if (startDate.isBefore(minDate)) {
@@ -753,8 +758,9 @@
     updateCalendars: function () {
       this.leftCalendar.calendar = this.buildCalendar(this.leftCalendar.month.month(), this.leftCalendar.month.year(), this.leftCalendar.month.hour(), this.leftCalendar.month.minute(), 'left');
       this.rightCalendar.calendar = this.buildCalendar(this.rightCalendar.month.month(), this.rightCalendar.month.year(), this.rightCalendar.month.hour(), this.rightCalendar.month.minute(), 'right');
-      this.container.find('.calendar.left').html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate));
-      this.container.find('.calendar.right').html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.startDate, this.maxDate));
+
+      this.container.find('.calendar.left').html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate, 'left'));
+      this.container.find('.calendar.right').html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.startDate, this.maxDate, 'right'));
 
       this.container.find('.ranges li').removeClass('active');
       var customRange = true;
@@ -875,7 +881,7 @@
       return monthHtml + yearHtml;
     },
 
-    renderCalendar: function (calendar, selected, minDate, maxDate) {
+    renderCalendar: function (calendar, selected, minDate, maxDate, side) {
       var self = this;
 
       function header() {
@@ -979,6 +985,12 @@
             return renderMonths();
           default:
             return renderDays();
+        }
+      }
+
+      if (self.singleDateRangePicker) {
+        if (side == 'left' && self.leftCalendar.selected || side == 'right' && !self.leftCalendar.selected) {
+          return '';
         }
       }
 
