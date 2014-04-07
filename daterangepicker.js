@@ -538,8 +538,6 @@
 
       this.oldStartDate = this.startDate.clone();
       this.oldEndDate = this.endDate.clone();
-      this.leftCalendar.selected = false;
-      this.rightCalendar.selected = false;
 
       $(document).off('click.daterangepicker', this.outsideClick);
       this.element.trigger('hide.daterangepicker', this);
@@ -634,37 +632,63 @@
     },
 
     clickDate: function (e) {
-      var title = $(e.target).attr('data-title');
-      var row = title.substr(1, 1);
-      var col = title.substr(3, 1);
-      var cal = $(e.target).parents('.calendar');
+      var self = this,
+        title = $(e.target).attr('data-title'),
+        row = title.substr(1, 1),
+        col = title.substr(3, 1),
+        cal = $(e.target).parents('.calendar'),
+        selectedCalendar = cal.hasClass('left') ? self.leftCalendar : self.rightCalendar,
+        selectedDate = selectedCalendar.calendar[row][col];
 
       var startDate, endDate;
+
       if (cal.hasClass('left')) {
-        startDate = this.leftCalendar.calendar[row][col];
-        endDate = this.endDate;
-        this.leftCalendar.selected = true;
-        if (typeof this.dateLimit === 'object') {
-          var maxDate = moment(startDate).add(this.dateLimit).startOf('day');
+        if (!self.singleDateRangePicker) {
+          startDate = selectedDate;
+          endDate = self.endDate;
+        }
+        else {
+          // look at the current dates and see which is the closest and overwrite that one:
+          var dateDiffs = [
+            {type: 'start', distance: self.startDate.diff(selectedDate)},
+            {type: 'end', distance: self.endDate.diff(selectedDate)}
+          ];
+
+          dateDiffs.sort(function (a, b) {
+            return Math.abs(a.distance) - Math.abs(b.distance);
+          });
+
+          if (dateDiffs[0].type === 'start') {
+            startDate = selectedDate;
+            endDate = self.endDate;
+          }
+          else {
+            startDate = self.startDate;
+            endDate = selectedDate;
+          }
+        }
+
+        if (typeof self.dateLimit === 'object') {
+          var maxDate = moment(startDate).add(self.dateLimit).startOf('day');
           if (endDate.isAfter(maxDate)) {
             endDate = maxDate;
           }
         }
       } else {
-        startDate = this.startDate;
-        endDate = this.rightCalendar.calendar[row][col];
-        this.rightCalendar.selected = true;
-        if (typeof this.dateLimit === 'object') {
-          var minDate = moment(endDate).subtract(this.dateLimit).startOf('day');
+        startDate = self.startDate;
+        endDate = selectedDate;
+        if (typeof self.dateLimit === 'object') {
+          var minDate = moment(endDate).subtract(self.dateLimit).startOf('day');
           if (startDate.isBefore(minDate)) {
             startDate = minDate;
           }
         }
       }
 
-      if (this.singleDatePicker && cal.hasClass('left')) {
+
+      if (self.singleDatePicker && cal.hasClass('left')) {
         endDate = startDate.clone();
-      } else if (this.singleDatePicker && cal.hasClass('right')) {
+      } else if (self.singleDatePicker && cal.hasClass('right')) {
         startDate = endDate.clone();
       }
 
@@ -672,25 +696,26 @@
 
       if (startDate.isSame(endDate) || startDate.isBefore(endDate)) {
         $(e.target).addClass('active');
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.chosenLabel = this.locale.customRangeLabel;
+        self.startDate = startDate;
+        self.endDate = endDate;
+        self.chosenLabel = self.locale.customRangeLabel;
       } else if (startDate.isAfter(endDate)) {
         $(e.target).addClass('active');
-        var difference = this.endDate.diff(this.startDate);
-        this.startDate = startDate;
-        this.endDate = moment(startDate).add('ms', difference);
-        this.chosenLabel = this.locale.customRangeLabel;
+        var difference = self.endDate.diff(self.startDate);
+        self.startDate = startDate;
+        self.endDate = moment(startDate).add('ms', difference);
+        self.chosenLabel = self.locale.customRangeLabel;
       }
 
-      this.leftCalendar.month.month(this.startDate.month()).year(this.startDate.year());
-      this.rightCalendar.month.month(this.endDate.month()).year(this.endDate.year());
-      this.updateCalendars();
+      self.leftCalendar.month.month(self.startDate.month()).year(self.startDate.year());
+      self.rightCalendar.month.month(self.endDate.month()).year(self.endDate.year());
+      self.updateCalendars();
 
       endDate.endOf('day');
 
-      if (this.singleDatePicker)
-        this.clickApply();
+      if (self.singleDatePicker) {
+        self.clickApply();
+      }
     },
 
     clickApply: function (e) {
@@ -757,10 +782,14 @@
 
     updateCalendars: function () {
       this.leftCalendar.calendar = this.buildCalendar(this.leftCalendar.month.month(), this.leftCalendar.month.year(), this.leftCalendar.month.hour(), this.leftCalendar.month.minute(), 'left');
-      this.rightCalendar.calendar = this.buildCalendar(this.rightCalendar.month.month(), this.rightCalendar.month.year(), this.rightCalendar.month.hour(), this.rightCalendar.month.minute(), 'right');
+      if (!this.singleDateRangePicker) {
+        this.rightCalendar.calendar = this.buildCalendar(this.rightCalendar.month.month(), this.rightCalendar.month.year(), this.rightCalendar.month.hour(), this.rightCalendar.month.minute(), 'right');
+      }
 
       this.container.find('.calendar.left').html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate, 'left'));
-      this.container.find('.calendar.right').html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.startDate, this.maxDate, 'right'));
+      if (!this.singleDateRangePicker) {
+        this.container.find('.calendar.right').html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.startDate, this.maxDate, 'right'));
+      }
 
       this.container.find('.ranges li').removeClass('active');
       var customRange = true;
@@ -794,11 +823,7 @@
         for (var row = 0; row < 3; row++) {
           calendar[row] = [];
           for (var col = 0; col < 4; col++) {
-            var month = initialDate.clone().add('months', ((row * 4) + col));
-            if (side == 'right') {
-              month.endOf('month');
-            }
-            calendar[row][col] = month;
+            calendar[row][col] = initialDate.clone().add('months', ((row * 4) + col));
           }
         }
 
@@ -928,7 +953,7 @@
           if ((minDate && date.isBefore(minDate)) || (maxDate && date.isAfter(maxDate))) {
             classes.push('off');
             classes.push('disabled');
-          } else if (date.format(format) == selected.format(format)) {
+          } else if (date.format(format) == selected.format(format) && !self.singleDateRangePicker) {
             classes.push('active');
             if (date.format(format) == self.startDate.format(format)) {
               classes.push('start-date');
@@ -985,12 +1010,6 @@
             return renderMonths();
           default:
             return renderDays();
-        }
-      }
-
-      if (self.singleDateRangePicker) {
-        if (side == 'left' && self.leftCalendar.selected || side == 'right' && !self.leftCalendar.selected) {
-          return '';
         }
       }
 
