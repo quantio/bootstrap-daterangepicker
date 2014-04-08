@@ -5,11 +5,11 @@
     <title>A date range picker for Bootstrap</title>
     <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" media="all" href="daterangepicker-bs3.css"/>
+    <link rel="stylesheet" type="text/css" media="all" href="../src/css/daterangepicker-bs3.css"/>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
     <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="moment.js"></script>
-    <script type="text/javascript" src="daterangepicker.js"></script>
+    <script type="text/javascript" src="../moment.js"></script>
+    <script type="text/javascript" src="../src/js/daterangepicker.js"></script>
 </head>
 <body>
 
@@ -44,7 +44,22 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#reservation').daterangepicker(null, function (start, end, label) {
+            $('#reservation').daterangepicker({
+                minViewMode: 'months',
+                startDate: moment('01/01/2014'),
+                endDate: moment('03/30/2014'),
+                minDate: '12/01/2013',
+                maxDate: '04/30/2014',
+                singleDateRangePicker: true,
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                    'Last 7 Days': [moment().subtract('days', 6), moment()],
+                    'Last 30 Days': [moment().subtract('days', 29), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                }
+            }, function (start, end, label) {
                 console.log(start.toISOString(), end.toISOString(), label);
             });
         });
@@ -52,7 +67,7 @@
 
 </div>
 
-
+<!--
 <h4>Basic Single Date Picker</h4>
 
 <div class="well">
@@ -122,7 +137,7 @@
         });
     </script>
 
-</div>
+</div>-->
 
 <h4>Options Usage</h4>
 
@@ -152,14 +167,8 @@
             var optionSet1 = {
                 startDate: moment().subtract('days', 29),
                 endDate: moment(),
-                minDate: '01/01/2012',
-                maxDate: '12/31/2014',
-                dateLimit: { days: 60 },
-                showDropdowns: true,
-                showWeekNumbers: true,
-                timePicker: false,
-                timePickerIncrement: 1,
-                timePicker12Hour: true,
+                minDate: '12/01/2013',
+                maxDate: '04/31/2014',
                 ranges: {
                     'Today': [moment(), moment()],
                     'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
@@ -204,7 +213,7 @@
 
             $('#reportrange span').html(moment().subtract('days', 29).format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
 
-            $('#reportrange').daterangepicker(optionSet1, cb);
+            /*$('#reportrange').daterangepicker(optionSet1, cb);*/
 
             $('#reportrange').on('show.daterangepicker', function () {
                 console.log("show event fired");
@@ -261,7 +270,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#reportrange2 span').html(moment().subtract('days', 29).format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
-            $('#reportrange2').daterangepicker();
+            /*$('#reportrange2').daterangepicker();*/
         });
     </script>
 
