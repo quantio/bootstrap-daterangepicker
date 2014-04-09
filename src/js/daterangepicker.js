@@ -652,7 +652,7 @@
         }
         else {
           // if we're setting a new date clear out the old dates:
-          if (!self.datesPicked.length) {
+          if (!self.datesPicked.length || selectedDate.isBefore(startDate)) {
             startDate = selectedDate;
             endDate = startDate.clone().endOf('month');
           }
