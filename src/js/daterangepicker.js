@@ -655,6 +655,7 @@
           if (!self.datesPicked.length || selectedDate.isBefore(startDate)) {
             startDate = selectedDate;
             endDate = startDate.clone().endOf('month');
+            self.datesPicked = [];
           }
 
           self.datesPicked.push(selectedDate);
