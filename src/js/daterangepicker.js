@@ -377,7 +377,7 @@
       this.viewMode = this.minViewMode;
       this.container.addClass('view-mode-' + this.viewMode);
 
-      this.updateView();
+      this.updateView(true);
       this.updateCalendars();
 
     },
@@ -414,8 +414,14 @@
       this.updateCalendars();
     },
 
-    updateView: function () {
-      this.leftCalendar.month.month(this.startDate.month()).year(this.startDate.year());
+    updateView: function (initializing) {
+      // on single date range picker mode we default to show the end date:
+      if (initializing || this.singleDateRangePicker) {
+        this.leftCalendar.month.month(this.endDate.month()).year(this.endDate.year());
+      }
+      else {
+        this.leftCalendar.month.month(this.startDate.month()).year(this.startDate.year());
+      }
       this.rightCalendar.month.month(this.endDate.month()).year(this.endDate.year());
       this.updateFormInputs();
     },
