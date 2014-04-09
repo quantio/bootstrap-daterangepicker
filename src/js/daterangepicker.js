@@ -265,6 +265,8 @@
       }
 
       this.singleDateRangePicker = options.singleDateRangePicker || false;
+      // keeps track of all of the dates clicked so far in singleDateRangePicker mode:
+      this.datesPicked = [];
 
       var start, end, range;
 
@@ -640,7 +642,8 @@
         selectedCalendar = cal.hasClass('left') ? self.leftCalendar : self.rightCalendar,
         selectedDate = selectedCalendar.calendar[row][col];
 
-      var startDate, endDate;
+      var startDate = self.startDate,
+        endDate = self.endDate;
 
       if (cal.hasClass('left')) {
         if (!self.singleDateRangePicker) {
@@ -648,22 +651,19 @@
           endDate = self.endDate;
         }
         else {
-          // look at the current dates and see which is the closest and overwrite that one:
-          var dateDiffs = [
-            {type: 'start', distance: self.startDate.diff(selectedDate)},
-            {type: 'end', distance: self.endDate.diff(selectedDate)}
-          ];
-
-          dateDiffs.sort(function (a, b) {
-            return Math.abs(a.distance) - Math.abs(b.distance);
-          });
-
-          if (dateDiffs[0].type === 'start') {
+          // if we're setting a new date clear out the old dates:
+          if (!self.datesPicked.length) {
             startDate = selectedDate;
-            endDate = self.endDate;
+            endDate = startDate.clone().endOf('month');
+          }
+
+          self.datesPicked.push(selectedDate);
+
+          if (self.datesPicked.length == 1) {
+            startDate = selectedDate;
           }
           else {
-            startDate = self.startDate;
+            self.datesPicked = [];
             endDate = selectedDate;
           }
         }
