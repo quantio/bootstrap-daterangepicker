@@ -1041,7 +1041,7 @@
               calendar[i] = [];
               for (j = 0; j < 4; j++) {
                 calendar[i][j] = curDate.clone();
-                curDate = curDate.add('month', 1);
+                curDate = curDate.add(1, 'month');
                 if (side == 'right') {
                   curDate = curDate.endOf('month');
                 }
